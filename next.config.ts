@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  trailingSlash: true,
+  // Ensure all assets are properly loaded
+  webpack: (config) => {
+    config.output.publicPath = '/poor_mans_excel/';
+    return config;
+  },
   /* config options here */
 };
 
