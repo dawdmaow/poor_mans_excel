@@ -1,103 +1,168 @@
-import Image from "next/image";
+/* eslint-disable */
+'use client';
+
+import { useState } from 'react';
+import { SpreadsheetHeader } from '@/components/SpreadsheetHeader';
+import { SpreadsheetRow } from '@/components/SpreadsheetRow';
+import { evaluateFormula } from '@/utils/formulaParser';
+import { SpreadsheetData } from '@/types/spreadsheet';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [data, setData] = useState<SpreadsheetData>({
+    '0-0': 'Numbers',
+    '1-0': '10',
+    '2-0': '20',
+    '3-0': '30',
+    '4-0': '40',
+    '5-0': '50',
+    '0-1': 'Text',
+    '1-1': 'Hello',
+    '2-1': 'World',
+    '3-1': '!',
+    '0-2': 'Ranges',
+    '1-2': '=SUM(A2:A6)',
+    '2-2': '=AVERAGE(A2:A6)',
+    '3-2': '=MIN(A2:A6)',
+    '4-2': '=MAX(A2:A6)',
+    '5-2': '=SUM(A2:A6)+SUM(A2:A6)+SUM(A2:A6)',
+    '0-3': 'CONCAT',
+    '1-3': '=CONCAT(B1," ",B2,B3,B4)',
+    '2-3': '=CONCAT(B1:B4)',
+    '0-4': 'IF',
+    '1-4': '=IF(E4>=E5,"Higher or equal","Lower")',
+    '2-4': '=IF(E4==E5,"Equal","Not Equal")',
+    '3-4': '13',
+    '4-4': '13',
+    '0-5': 'ROUND',
+    '1-5': '=ROUND(F4,2)',
+    '2-5': '=ROUND(F4,1)',
+    '3-5': '3.1415926',
+    '0-6': 'Errors',
+    '1-6': '=ROUND(A1)',
+    '2-6': '=SUM()',
+    '7-0': 'Rectangular',
+    '8-0': '1',
+    '9-0': '2',
+    '10-0': '3',
+    '7-1': '4',
+    '8-1': '5',
+    '9-1': '6',
+    '10-1': '7',
+    '7-2': '8',
+    '8-2': '9',
+    '9-2': '10',
+    '10-2': '11',
+    '7-3': '=SUM(A8:C11)',
+    '8-3': '=AVERAGE(A8:C11)',
+    '9-3': '=MIN(A8:C11)',
+    '10-3': '=MAX(A8:C11)',
+    '7-4': '=COUNT(A11:C18)',
+    '7-5': 'Basic Math',
+    '8-5': '10',
+    '9-5': '5',
+    '10-5': '=F9*2',
+    '11-5': '=F9+F10',
+    '12-5': '=F9-F10',
+    '13-5': '=F9/F10',
+    '14-5': '=F9*F10+F11',
+  });
+  const [editing, setEditing] = useState<string | null>(null);
+  const [focusedCell, setFocusedCell] = useState<string | null>(null);
+  const rows = 20;
+  const cols = 8;
+  const columnHeaders = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const getCellValue = (row: number, col: number): string => {
+    const cellId = `${row}-${col}`;
+    const value = data[cellId] || '';
+    if (value === '=') {
+      return '#ERROR';
+    }
+    if (value.startsWith('=')) {
+      return evaluateFormula(value, getCellValue);
+    }
+    return value;
+  };
+
+  const handleCellChange = (row: number, col: number, value: string) => {
+    const cellId = `${row}-${col}`;
+    setData(prev => ({ ...prev, [cellId]: value }));
+  };
+
+  const clearAllCells = () => {
+    setData({});
+  };
+
+  const isEditing = (row: number, col: number): boolean => {
+    return editing === `${row}-${col}`;
+  };
+
+  const isReferenced = (row: number, col: number): boolean => {
+    if (!focusedCell) return false;
+    const value = data[focusedCell] || '';
+    if (!value.startsWith('=')) return false;
+
+    const cellId = `${row}-${col}`;
+    const references = new Set<string>();
+    const rangeMatches = value.matchAll(/([A-H]\d+):([A-H]\d+)/g);
+    for (const match of rangeMatches) {
+      const [_, start, end] = match;
+      const startCol = start.charCodeAt(0) - 65;
+      const startRow = parseInt(start.slice(1)) - 1;
+      const endCol = end.charCodeAt(0) - 65;
+      const endRow = parseInt(end.slice(1)) - 1;
+
+      for (let r = Math.min(startRow, endRow); r <= Math.max(startRow, endRow); r++) {
+        for (let c = Math.min(startCol, endCol); c <= Math.max(startCol, endCol); c++) {
+          references.add(`${r}-${c}`);
+        }
+      }
+    }
+
+    const cellMatches = value.matchAll(/([A-H]\d+)/g);
+    for (const match of cellMatches) {
+      const cell = match[1];
+      const col = cell.charCodeAt(0) - 65;
+      const row = parseInt(cell.slice(1)) - 1;
+      references.add(`${row}-${col}`);
+    }
+
+    return references.has(cellId);
+  };
+
+  return (
+    <main className="h-screen bg-gray-900 text-white p-4">
+      <div className="h-[calc(100vh-2rem)]">
+        <div className="h-full overflow-auto">
+          <table className="border-collapse border border-gray-700 w-full">
+            <SpreadsheetHeader
+              columnHeaders={columnHeaders}
+              onClearAll={clearAllCells}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <tbody>
+              {Array.from({ length: rows }).map((_, rowIndex) => (
+                <SpreadsheetRow
+                  key={rowIndex}
+                  rowIndex={rowIndex}
+                  cols={cols}
+                  getCellValue={getCellValue}
+                  isEditing={isEditing}
+                  isReferenced={isReferenced}
+                  onCellEdit={handleCellChange}
+                  onCellFocus={(row, col) => {
+                    setFocusedCell(`${row}-${col}`);
+                    setEditing(`${row}-${col}`);
+                  }}
+                  onCellBlur={() => {
+                    setEditing(null);
+                    setFocusedCell(null);
+                  }}
+                />
+              ))}
+            </tbody>
+          </table>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+    </main>
   );
 }
