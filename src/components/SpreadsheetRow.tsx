@@ -4,6 +4,7 @@ interface SpreadsheetRowProps {
     rowIndex: number;
     cols: number;
     getCellValue: (row: number, col: number) => string;
+    getRawValue: (row: number, col: number) => string;
     isEditing: (row: number, col: number) => boolean;
     isReferenced: (row: number, col: number) => boolean;
     onCellEdit: (row: number, col: number, value: string) => void;
@@ -15,6 +16,7 @@ export const SpreadsheetRow: React.FC<SpreadsheetRowProps> = ({
     rowIndex,
     cols,
     getCellValue,
+    getRawValue,
     isEditing,
     isReferenced,
     onCellEdit,
@@ -30,9 +32,10 @@ export const SpreadsheetRow: React.FC<SpreadsheetRowProps> = ({
                 <SpreadsheetCell
                     key={`${rowIndex}-${colIndex}`}
                     value={getCellValue(rowIndex, colIndex)}
+                    rawValue={getRawValue(rowIndex, colIndex)}
                     isEditing={isEditing(rowIndex, colIndex)}
                     isReferenced={isReferenced(rowIndex, colIndex)}
-                    onEdit={(value) => onCellEdit(rowIndex, colIndex, value)}
+                    onEdit={(value: string) => onCellEdit(rowIndex, colIndex, value)}
                     onFocus={() => onCellFocus(rowIndex, colIndex)}
                     onBlur={onCellBlur}
                 />

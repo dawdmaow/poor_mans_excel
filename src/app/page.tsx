@@ -130,6 +130,11 @@ export default function Home() {
     return references.has(cellId);
   };
 
+  const getRawValue = (row: number, col: number): string => {
+    const cellId = `${row}-${col}`;
+    return data[cellId] || '';
+  };
+
   return (
     <main className="h-screen bg-gray-900 text-white p-4">
       <div className="h-[calc(100vh-2rem)]">
@@ -146,6 +151,7 @@ export default function Home() {
                   rowIndex={rowIndex}
                   cols={cols}
                   getCellValue={getCellValue}
+                  getRawValue={getRawValue}
                   isEditing={isEditing}
                   isReferenced={isReferenced}
                   onCellEdit={handleCellChange}

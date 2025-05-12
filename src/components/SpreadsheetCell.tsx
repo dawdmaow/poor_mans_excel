@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import React from 'react';
 
 interface SpreadsheetCellProps {
     value: string;
+    rawValue: string;
     isEditing: boolean;
     isReferenced: boolean;
     onEdit: (value: string) => void;
@@ -11,13 +13,21 @@ interface SpreadsheetCellProps {
 
 export const SpreadsheetCell: React.FC<SpreadsheetCellProps> = ({
     value,
+    rawValue,
     isEditing,
     isReferenced,
     onEdit,
     onFocus,
     onBlur,
 }) => {
-    const [inputValue, setInputValue] = useState(value);
+    const [inputValue, setInputValue] = useState(rawValue);
+
+    // Update input value when rawValue changes and we're not editing
+    React.useEffect(() => {
+        if (!isEditing) {
+            setInputValue(rawValue);
+        }
+    }, [rawValue, isEditing]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
