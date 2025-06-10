@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+A msimple spreadsheet built with Next.js, React 19 and TypeScript. Features real-time formula evaluation and cell referencing. Styled with TailwindCSS.
 
-## Getting Started
+# Online
 
-First, run the development server:
+https://dawdmaow.github.io/poor_mans_excel/
+
+# Features
+
+- **Interactive Grid**: Spreadsheet with column headers (A-H) and row numbers
+- **Formula Support**: Built-in functions including:
+  - Math: `SUM`, `AVERAGE`, `MIN`, `MAX`, `COUNT`
+  - Text: `CONCAT` (single cells and ranges)
+  - Logic: `IF` conditions with comparison operators
+  - Utility: `ROUND` for decimal precision
+- **Cell References**: Support for single cells (`A1`) and ranges (`A1:C5`)
+- **Visual Feedback**: Highlights referenced cells when editing formulas
+- **Real-time Evaluation**: Formulas update automatically as dependencies change
+- **Error Handling**: Graceful error display for invalid formulas
+
+# Prerequisites
+- Node.js 18+ 
+- npm
+
+# Installation
 
 ```bash
+# Install dependencies
+npm install
+# Start the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Formula Examples
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Basic math: `=A1+B1`, `=A1*2`
+- Functions: `=SUM(A1:A5)`, `=AVERAGE(B1:B10)`
+- Conditions: `=IF(A1>10,"High","Low")`
+- Text: `=CONCAT(A1," ",B1)`, `=CONCAT(A1:C1)`
+- Rounding: `=ROUND(A1,2)`
